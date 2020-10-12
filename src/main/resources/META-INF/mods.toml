@@ -1,16 +1,17 @@
 modLoader="javafml"
 loaderVersion="[31,)"
+license="All rights reserved"
 
 [[mods]]
 modId="firewalker"
 version="1.0"
-displayName="Whiteridge"
+displayName="FireWalker"
 updateJSONURL="http://myurl.me"
-displayURL="http://example.com/"
-logoFile="enchantplus.png"
+displayURL="http://https://github.com/chrisoliver345/Fire-Walker-1.16/"
+logoFile="logo.png"
 credits="Thanks to Chris"
 authors="Chris" #optional
-description="Mod for Minecraft 1.15"
+description="Mod for Minecraft 1.16.3"
 
 [[dependencies.firewalker]]
     modId="forge"
@@ -21,6 +22,6 @@ description="Mod for Minecraft 1.15"
 [[dependencies.firewalker]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.3]"
     ordering="NONE"
     side="BOTH"

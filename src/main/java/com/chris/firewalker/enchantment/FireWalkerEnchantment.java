@@ -11,12 +11,14 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -68,6 +70,7 @@ public class FireWalkerEnchantment extends Enchantment {
         @SubscribeEvent
         public static void doStuff(PlayerTickEvent event) {
             PlayerEntity playerIn = event.player;
+            LivingEntity living = playerIn;
             World worldIn = playerIn.getEntityWorld();
             BlockPos pos = playerIn.getPosition();
             if (playerIn.hasItemInSlot(EquipmentSlotType.FEET)
@@ -75,7 +78,7 @@ public class FireWalkerEnchantment extends Enchantment {
                     playerIn.getItemStackFromSlot(EquipmentSlotType.FEET)) > 0) {
                 int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_WALKER.get(),
                         playerIn.getItemStackFromSlot(EquipmentSlotType.FEET));
-                if (playerIn.onGround) {
+                if (playerIn.isOnGround()) {
                     BlockState blockstate = ModBlocks.SOLID_MAGMA.get().getDefaultState();
                     float f = (float) Math.min(16, 2 + level);
                     BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
@@ -87,7 +90,7 @@ public class FireWalkerEnchantment extends Enchantment {
                             if (blockstate1.isAir(worldIn, blockpos$mutable)) {
                                 BlockState blockstate2 = worldIn.getBlockState(blockpos);
                                 boolean isFull = blockstate2.getBlock() == Blocks.LAVA && blockstate2.get(FlowingFluidBlock.LEVEL) == 0;
-                                if (blockstate2.getMaterial() == Material.LAVA && isFull && blockstate.isValidPosition(worldIn, blockpos) && worldIn.func_226663_a_(blockstate, blockpos, ISelectionContext.dummy()) && !net.minecraftforge.event.ForgeEventFactory.onBlockPlace(playerIn, new net.minecraftforge.common.util.BlockSnapshot(worldIn, blockpos, blockstate2), net.minecraft.util.Direction.UP)) {
+                                if (blockstate2.getMaterial() == Material.LAVA && isFull && blockstate.isValidPosition(worldIn, blockpos) && worldIn.placedBlockCollides(blockstate, blockpos, ISelectionContext.dummy()) && !net.minecraftforge.event.ForgeEventFactory.onBlockPlace(living, net.minecraftforge.common.util.BlockSnapshot.create(worldIn.getDimensionKey(), worldIn, blockpos), net.minecraft.util.Direction.UP)) {
                                     worldIn.setBlockState(blockpos, blockstate);
                                     worldIn.getPendingBlockTicks().scheduleTick(blockpos, ModBlocks.SOLID_MAGMA.get(), MathHelper.nextInt(playerIn.getRNG(), 60, 120));
                                 }

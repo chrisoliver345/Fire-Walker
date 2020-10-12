@@ -20,23 +20,23 @@ public class SolidMagmaBlock extends DrySolidMagmaBlock {
 
     public SolidMagmaBlock(Block.Properties properties) {
         super(properties);
-        this.setDefaultState(this.stateContainer.getBaseState().with(AGE, Integer.valueOf(0)));
+        this.setDefaultState(this.stateContainer.getBaseState().with(AGE, 0));
     }
 
     public void tick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
         if ((rand.nextInt(3) == 0 || this.shouldMelt(worldIn, pos, 4)) && worldIn.getLight(pos) > 11 - state.get(AGE) - state.getOpacity(worldIn, pos) && this.slightlyMelt(state, worldIn, pos)) {
-            try (BlockPos.PooledMutable blockpos$pooledmutable = BlockPos.PooledMutable.retain()) {
-                for(Direction direction : Direction.values()) {
-                    blockpos$pooledmutable.setPos(pos).move(direction);
-                    BlockState blockstate = worldIn.getBlockState(blockpos$pooledmutable);
-                    if (blockstate.getBlock() == this && !this.slightlyMelt(blockstate, worldIn, blockpos$pooledmutable)) {
-                        worldIn.getPendingBlockTicks().scheduleTick(blockpos$pooledmutable, this, MathHelper.nextInt(rand, 20, 40));
-                    }
+            BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+
+            for(Direction direction : Direction.values()) {
+                blockpos$mutable.setAndMove(pos, direction);
+                BlockState blockstate = worldIn.getBlockState(blockpos$mutable);
+                if (blockstate.isIn(this) && !this.slightlyMelt(blockstate, worldIn, blockpos$mutable)) {
+                    worldIn.getPendingBlockTicks().scheduleTick(blockpos$mutable, this, MathHelper.nextInt(rand, 20, 40));
                 }
             }
 
         } else {
-            worldIn.getPendingBlockTicks().scheduleTick(pos, this, MathHelper.nextInt(rand, 10, 30));
+            worldIn.getPendingBlockTicks().scheduleTick(pos, this, MathHelper.nextInt(rand, 20, 40));
         }
     }
 
@@ -61,21 +61,19 @@ public class SolidMagmaBlock extends DrySolidMagmaBlock {
 
     private boolean shouldMelt(IBlockReader worldIn, BlockPos pos, int neighborsRequired) {
         int i = 0;
+        BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
 
-        try (BlockPos.PooledMutable blockpos$pooledmutable = BlockPos.PooledMutable.retain()) {
-            for(Direction direction : Direction.values()) {
-                blockpos$pooledmutable.setPos(pos).move(direction);
-                if (worldIn.getBlockState(blockpos$pooledmutable).getBlock() == this) {
-                    ++i;
-                    if (i >= neighborsRequired) {
-                        boolean flag = false;
-                        return flag;
-                    }
+        for(Direction direction : Direction.values()) {
+            blockpos$mutable.setAndMove(pos, direction);
+            if (worldIn.getBlockState(blockpos$mutable).isIn(this)) {
+                ++i;
+                if (i >= neighborsRequired) {
+                    return false;
                 }
             }
-
-            return true;
         }
+
+        return true;
     }
 
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
